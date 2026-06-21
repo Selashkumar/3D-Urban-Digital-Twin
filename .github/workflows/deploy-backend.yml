@@ -15,9 +15,8 @@ on:
 
 env:
   NODE_VERSION: '22'
-  # pull the webapp name from a secret so this workflow file can be committed
-  # without leaking the actual resource name
   AZURE_WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
+  GYP_MSVS_VERSION: '2022'
 
 jobs:
   build-and-deploy:
@@ -47,6 +46,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x86
+          toolset: '14.3'
 
       # Step 3: install backend dependencies
       # Using npm ci instead of npm install because:
