@@ -16,7 +16,7 @@ The Node.js backend handles OGC API Features requests and live WebSocket fleet m
    - **Resource Group**: Create a new one (e.g., `urban-twin-rg` or `3d-urban-twin-rg`).
    - **Name**: Pick a unique name (e.g., `3d-urban-twin-backend`). This forms your backend URL: `https://<your-backend-name>.azurewebsites.net`.
    - **Publish**: Select **Code**.
-   - **Runtime stack**: Select **Node 20 LTS**.
+   - **Runtime stack**: Select **Node 22 LTS**.
    - **Operating System**: Select **Linux**.
    - **Pricing Plan**: Select **Basic B1** (B1 or higher is recommended for WebSocket support and reliable resource limits; Free F1 can be used but does not officially support production WebSockets).
 4. Click **Review + Create**, then click **Create**. Wait for the resource deployment to complete.

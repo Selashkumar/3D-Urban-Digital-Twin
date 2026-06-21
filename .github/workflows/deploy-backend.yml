@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '22'
   # pull the webapp name from a secret so this workflow file can be committed
   # without leaking the actual resource name
   AZURE_WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
@@ -49,7 +49,9 @@ jobs:
       # - faster in CI (skips package resolution)
       # - fails if package-lock.json is out of sync with package.json (catches drift early)
       - name: Install backend dependencies
-        run: npm ci
+        run: |
+          npm install -g node-gyp@latest
+          npm ci
         working-directory: backend
 
       # Step 4: run basic smoke test
