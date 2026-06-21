@@ -39,7 +39,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          architecture: 'x86'
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
@@ -50,8 +49,7 @@ jobs:
       # - fails if package-lock.json is out of sync with package.json (catches drift early)
       - name: Install backend dependencies
         run: |
-          npm install -g node-gyp@latest
-          npm ci
+          npm ci --arch=ia32
         working-directory: backend
 
       # Step 4: run basic smoke test
