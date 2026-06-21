@@ -87,7 +87,7 @@ Connect your GitHub repository to your Azure App Service.
 > **"not a valid Win32 application" or DLOPEN failed error**:
 > Since `better-sqlite3` compiles native C++ modules, the OS where GitHub Actions builds the code **must match** the OS of your Azure App Service. 
 > 
-> * **If you deployed Windows App Service**: In `.github/workflows/deploy-backend.yml`, we use `runs-on: windows-latest` so that dependencies are compiled for Windows.
+> * **If you deployed Windows App Service (Free F1 Plan)**: Azure uses a 32-bit (x86) Node.js runtime. In `.github/workflows/deploy-backend.yml`, we use `runs-on: windows-latest` and set `architecture: 'x86'` under the Node setup step so that dependencies are compiled for 32-bit Windows.
 > * **If you deployed Linux App Service**: If you use a Linux App Service, make sure the workflow uses `runs-on: ubuntu-latest`.
 
 ---

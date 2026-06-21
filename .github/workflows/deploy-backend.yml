@@ -39,6 +39,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          architecture: 'x86'
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
