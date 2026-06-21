@@ -21,8 +21,11 @@ env:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
-    environment: production   # requires manual approval if you set up environment protection rules
+    runs-on: windows-latest
+    environment: production
+    defaults:
+      run:
+        shell: bash
 
     steps:
       # Step 1: get the code

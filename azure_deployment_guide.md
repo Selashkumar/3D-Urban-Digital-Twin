@@ -83,27 +83,52 @@ Connect your GitHub repository to your Azure App Service.
   2. Click **Deploy Backend to Azure App Service** in the left menu.
   3. Click the **Run workflow** dropdown on the right and select **Run workflow**.
 
+> [!IMPORTANT]
+> **"not a valid Win32 application" or DLOPEN failed error**:
+> Since `better-sqlite3` compiles native C++ modules, the OS where GitHub Actions builds the code **must match** the OS of your Azure App Service. 
+> 
+> * **If you deployed Windows App Service**: In `.github/workflows/deploy-backend.yml`, we use `runs-on: windows-latest` so that dependencies are compiled for Windows.
+> * **If you deployed Linux App Service**: If you use a Linux App Service, make sure the workflow uses `runs-on: ubuntu-latest`.
+
 ---
 
 ## 🛠️ Phase 3: Seeding the GeoPackage Database on Azure
 
-Because the database file `urban_twin.gpkg` is listed in your `.gitignore` and not committed to git, it will be missing on your first deployment. Run the seeder script directly inside your Azure Web App container:
+Because the database file `urban_twin.gpkg` is listed in your `.gitignore` and not committed to git, it will be missing on your first deployment. Run the seeder script directly inside your Azure Web App using the tools for your selected OS:
 
+### For Windows App Service (Console)
 1. In the Azure Portal, go to your **Web App** resource.
-2. In the left menu under **Development Tools**, click on **SSH** (or search for "SSH" in the search bar).
-3. Click the **Go ->** link. This opens a terminal inside the running Azure container.
-4. Run the seed command to initialize the OGC GeoPackage database:
+2. In the left-hand navigation menu under **Development Tools**, click on **Console**.
+3. Navigate to the deployed site folder:
+   ```cmd
+   cd site\wwwroot
+   ```
+4. Run the seed command:
+   ```cmd
+   npm run seed
+   ```
+
+### For Linux App Service (SSH)
+1. In the Azure Portal, go to your **Web App** resource.
+2. In the left-hand navigation menu under **Development Tools**, click on **SSH** and click **Go ->**.
+3. In the terminal, navigate to the site directory:
    ```bash
-   cd /home/site/wwwroot && npm run seed
+   cd /home/site/wwwroot
    ```
-5. Confirm the console prints:
-   ```text
-   ✅ Done! Compliant urban_twin.gpkg created at /home/site/wwwroot/data/urban_twin.gpkg
-      buildings: 416
-      fleet:     20
-      ndvi_grid: 168
+4. Run the seed command:
+   ```bash
+   npm run seed
    ```
-6. Test your backend live endpoint by visiting: `https://<your-backend-name>.azurewebsites.net/health` (it should display `{"status":"ok","database":"healthy"}`).
+
+### Verification
+Confirm the console output displays the successful seeding:
+```text
+✅ Done! Compliant urban_twin.gpkg created
+   buildings: 416
+   fleet:     20
+   ndvi_grid: 168
+```
+Test your backend live endpoint by visiting: `https://<your-backend-name>.azurewebsites.net/health` (it should display `{"status":"ok","database":"healthy"}`).
 
 ---
 
