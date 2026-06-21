@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# GeoPackage runtime files (seed locally with npm run seed)
+*.gpkg
+*.gpkg-wal
+*.gpkg-shm
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

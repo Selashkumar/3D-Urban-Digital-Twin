@@ -1,0 +1,88 @@
+name: Deploy Backend to Azure App Service
+
+# Only trigger when backend/ changes on main -- no point rebuilding the backend
+# every time someone tweaks the README or frontend CSS
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'  # also re-run if this workflow changes
+
+  # allow manual trigger from the Actions tab -- useful for first-time deploys
+  # or if you need to force a redeploy without changing backend code
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  # pull the webapp name from a secret so this workflow file can be committed
+  # without leaking the actual resource name
+  AZURE_WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production   # requires manual approval if you set up environment protection rules
+
+    steps:
+      # Step 1: get the code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Node.js setup
+      # Using the setup-node action with caching -- this caches ~/.npm across runs
+      # and makes subsequent installs much faster (30s -> 5s typically)
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      # Step 3: install backend dependencies
+      # Using npm ci instead of npm install because:
+      # - ci is deterministic (respects package-lock.json exactly)
+      # - faster in CI (skips package resolution)
+      # - fails if package-lock.json is out of sync with package.json (catches drift early)
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: backend
+
+      # Step 4: run basic smoke test
+      # We're not doing full integration tests here (would need a seeded GPKG and
+      # probably a separate job), just checking that the module loads without crashing
+      - name: Smoke test (node syntax check)
+        run: node --check server.js
+        working-directory: backend
+
+      # Step 5: check if GeoPackage exists -- we don't commit the .gpkg file
+      # (it's in .gitignore), so in production it should already be on the App Service
+      # persistent storage. Skip seeding in CI to avoid 30s script run on every deploy.
+      #
+      # If you DO need to reseed in CI (e.g. first deploy or schema change), you can:
+      # 1. Uncomment the seed step below
+      # 2. Or trigger a manual run of a separate "seed" workflow
+      #
+      # - name: Seed GeoPackage (skip in CI -- assume it's on persistent storage)
+      #   run: python data-pipeline/seed_gpkg.py
+      #   if: false  # change to: ${{ !env.SKIP_SEED }}
+
+      # Step 6: deploy to Azure App Service
+      # The publish profile is an XML file you download from the Azure portal
+      # (App Service -> Get publish profile). Store it as a repo secret.
+      # It contains credentials so treat it as sensitive -- don't print it in logs.
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: backend/   # deploy only the backend directory, not the whole repo
+
+      # Step 7: quick health check after deploy
+      - name: Post-deploy health check
+        run: |
+          sleep 30
+          curl --fail --silent --show-error \
+            "https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/health" \
+            | python3 -c "import sys, json; data=json.load(sys.stdin); print('OK:', data.get('status', 'unknown'))"
+        continue-on-error: true

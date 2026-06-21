@@ -1,0 +1,24 @@
+# data-pipeline/requirements.txt
+#
+# Note: spatialite is a C extension that ships with some GDAL builds.
+# You can't pip-install it directly -- it's usually available via:
+#   brew install spatialite-tools  (macOS)
+#   apt install libsqlite3-mod-spatialite  (Debian/Ubuntu)
+#
+# For this project we're going the pure-sqlite3 route for GeoPackage I/O
+# since GDAL install pain is real and not worth it for a demo. If you want
+# to swap in real raster processing later, uncomment the GDAL line.
+
+# Core geospatial stuff
+# GDAL>=3.8.0           # uncomment if you have GDAL installed via conda/brew
+numpy>=1.24.0
+shapely>=2.0.0          # geometry operations, WKB generation
+fiona>=1.9.0            # GeoPackage/shapefile I/O (wraps GDAL under the hood)
+pyproj>=3.6.0           # CRS transformations - EPSG lookups, WGS84 <-> UTM etc.
+
+# HTTP stuff for API calls (Overpass, Copernicus)
+requests>=2.31.0
+urllib3>=2.0.0          # requests already pulls this in, but pinning for the retry logic
+
+# Env vars - don't hardcode API keys
+python-dotenv>=1.0.0
