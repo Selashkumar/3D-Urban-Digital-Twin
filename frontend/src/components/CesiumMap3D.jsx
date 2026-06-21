@@ -207,8 +207,8 @@ export default function CesiumMap3D({
       viewer.scene.globe.enableLighting = false
       viewer.scene.fog.enabled = true
       viewer.scene.fog.density = 0.00008
-      viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#060912')
-      viewer.scene.globe.baseColor  = Cesium.Color.fromCssColorString('#0d1321')
+      viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#f3f4f6')
+      viewer.scene.globe.baseColor  = Cesium.Color.fromCssColorString('#ffffff')
 
       // Drape satellite imagery over 3D terrain mesh by default
       Cesium.createWorldTerrainAsync()
@@ -409,8 +409,8 @@ export default function CesiumMap3D({
           label: {
             text: props.name,
             font: 'bold 11px Inter, system-ui, sans-serif',
-            fillColor: Cesium.Color.WHITE,
-            outlineColor: Cesium.Color.fromCssColorString('#060912'),
+            fillColor: Cesium.Color.fromCssColorString('#1f2937'),
+            outlineColor: Cesium.Color.fromCssColorString('#ffffff'),
             outlineWidth: 3,
             style: Cesium.LabelStyle.FILL_AND_OUTLINE,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
