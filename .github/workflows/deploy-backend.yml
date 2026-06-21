@@ -16,11 +16,10 @@ on:
 env:
   NODE_VERSION: '22'
   AZURE_WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
-  GYP_MSVS_VERSION: '2022'
 
 jobs:
   build-and-deploy:
-    runs-on: windows-latest
+    runs-on: windows-2022
     environment: production
     defaults:
       run:
@@ -40,13 +39,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
-
-      # Step 2.5: Set up MSVC Developer Command Prompt
-      - name: Set up MSVC Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x86
-          toolset: '14.3'
 
       # Step 3: install backend dependencies
       # Using npm ci instead of npm install because:
