@@ -1,0 +1,20 @@
+{
+  "name": "urban-twin-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "setup:cesium": "node -e \"const {cpSync,mkdirSync,existsSync}=require('fs');const src='node_modules/cesium/Build/Cesium';const dst='public/cesium';mkdirSync(dst,{recursive:true});['Workers','Assets','Widgets','ThirdParty'].forEach(d=>{if(existsSync(src+'/'+d))cpSync(src+'/'+d,dst+'/'+d,{recursive:true})});const {createReadStream,createWriteStream}=require('fs');createReadStream(src+'/Cesium.js').pipe(createWriteStream(dst+'/Cesium.js'));console.log('✅ Cesium assets ready in public/cesium/');\""
+  },
+  "dependencies": {
+    "cesium": "^1.120.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.3.1"
+  }
+}

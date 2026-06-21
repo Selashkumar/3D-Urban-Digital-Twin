@@ -1,0 +1,24 @@
+# System Files
+.DS_Store
+Thumbs.db
+.DS_STORE
+
+/dist/
+/bazel-out
+*.log
+
+# dependencies
+node_modules
+/node_modules
+
+# compiled output
+/tmp
+/out-tsc
+
+# env files (local overrides)
+.env.local
+.env
+
+# CesiumJS static assets — very large, copied from node_modules at startup
+# Run: cp -r node_modules/cesium/Build/Cesium/{Workers,Assets,Widgets,ThirdParty} public/cesium/
+/public/cesium/

@@ -1,0 +1,22 @@
+# System Files
+.DS_Store
+Thumbs.db
+.DS_STORE
+
+/dist/
+/bazel-out
+/integration/bazel/bazel-*
+*.log
+
+# dependencies
+node_modules
+/node_modules
+
+# compiled output
+/tmp
+/out-tsc
+
+# GeoPackage runtime files
+data/*.gpkg
+data/*.gpkg-wal
+data/*.gpkg-shm
