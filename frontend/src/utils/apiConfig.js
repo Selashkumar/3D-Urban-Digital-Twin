@@ -17,7 +17,7 @@ export function wsUrl(path = '/ws') {
 
   // dev fallback to bypass flaky vite websocket proxy
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return `ws://${window.location.hostname}:3001${normalized}`
+    return `ws://${window.location.hostname}:3002${normalized}`
   }
 
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
