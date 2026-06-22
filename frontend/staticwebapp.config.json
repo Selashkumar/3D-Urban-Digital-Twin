@@ -1,28 +1,19 @@
 {
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/api/*", "/health", "/ws"]
+    "exclude": ["/cesium/*"]
   },
-  "routes": [
-    {
-      "route": "/api/*",
-      "allowedRoles": ["anonymous"]
-    },
-    {
-      "route": "/health",
-      "allowedRoles": ["anonymous"]
-    },
-    {
-      "route": "/ws",
-      "allowedRoles": ["anonymous"]
-    }
-  ],
   "globalHeaders": {
-    "Access-Control-Allow-Origin": "*"
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "SAMEORIGIN"
   },
   "responseOverrides": {
     "404": {
-      "rewrite": "/index.html"
+      "rewrite": "/index.html",
+      "statusCode": 200
     }
+  },
+  "mimeTypes": {
+    ".gpkg": "application/octet-stream"
   }
 }
