@@ -8,11 +8,12 @@ const blobName = process.env.AZURE_STORAGE_BLOB || 'urban_twin.gpkg'
 const localDbPath = path.join(__dirname, '..', 'data', 'urban_twin.gpkg')
 
 let blobClient = null
+let containerClient = null
 
 if (connectionString) {
   try {
     const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
-    const containerClient = blobServiceClient.getContainerClient(containerName)
+    containerClient = blobServiceClient.getContainerClient(containerName)
     blobClient = containerClient.getBlockBlobClient(blobName)
     console.log(`[Azure Storage] Configured for container: "${containerName}", blob: "${blobName}"`)
   } catch (error) {
@@ -35,7 +36,6 @@ async function downloadDatabaseFromBlob() {
   try {
     console.log('[Azure Storage] Downloading latest GeoPackage from Azure Blob Storage...')
     // Make sure container exists
-    const containerClient = blobClient.containerClient
     const exists = await containerClient.exists()
     if (!exists) {
       console.log(`[Azure Storage] Container "${containerName}" does not exist yet. Using local GeoPackage.`)
@@ -89,7 +89,6 @@ function scheduleDatabaseUpload() {
     try {
       console.log('[Azure Storage] Uploading updated GeoPackage to Azure Blob Storage...')
       
-      const containerClient = blobClient.containerClient
       const containerExists = await containerClient.exists()
       if (!containerExists) {
         await containerClient.create({ access: 'container' })
