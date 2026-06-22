@@ -17,7 +17,7 @@ function App() {
     imagery: 'esri',
   })
   const [backendStatus, setBackendStatus] = useState('checking')
-  const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true)
+  const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(false)
 
   const { status: wsStatus, lastFleetUpdate, lastBuildingUpdate } = useLiveUpdates(liveUpdatesEnabled)
   const { data: buildingsData, loading: buildingsLoading } = useOGCData('buildings', {
