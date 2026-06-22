@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏙️ 3D Urban Digital Twin
+# 3D Urban Digital Twin
 
 **A production-grade, real-time 3D city visualization platform** — streaming live geospatial data through an OGC-compliant REST API to an interactive Cesium globe with WebSocket-powered fleet tracking.
 
@@ -10,33 +10,37 @@
 [![OGC API](https://img.shields.io/badge/OGC_API-Features-005571?style=for-the-badge)](https://ogcapi.ogc.org/features/)
 [![Azure](https://img.shields.io/badge/Azure-App_Service-0078D4?style=for-the-badge&logo=microsoft-azure&logoColor=white)](https://azure.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](./LICENSE)
+[![GeoPackage](https://img.shields.io/badge/GeoPackage-OGC_Compliant-005571?style=for-the-badge)](https://www.geopackage.org/)
+[![WebSocket](https://img.shields.io/badge/WebSocket-Real--time-6366f1?style=for-the-badge&logo=socket.io&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
 
-[**Live Demo**](https://github.com/Selashkumar/3D-Urban-Digital-Twin) · [**API Docs**](#-ogc-api-reference) · [**Deploy to Azure**](#-azure-deployment)
+[**Live Demo**](https://github.com/Selashkumar/3D-Urban-Digital-Twin) &nbsp;·&nbsp; [**API Docs**](#ogc-api-reference) &nbsp;·&nbsp; [**Deploy to Azure**](#azure-deployment)
 
 </div>
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Architecture](#-architecture)
-- [System Flow](#-system-flow)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Quick Start](#-quick-start)
-- [Data Pipeline](#-data-pipeline)
-- [OGC API Reference](#-ogc-api-reference)
-- [WebSocket Protocol](#-websocket-protocol)
-- [Azure Deployment](#-azure-deployment)
-- [CI/CD Pipeline](#-cicd-pipeline)
-- [Environment Variables](#-environment-variables)
-- [License](#-license)
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+- [System Flow](#system-flow)
+- [Request Flow Diagram](#request-flow-diagram)
+- [Data Layer Schema](#data-layer-schema)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Quick Start](#quick-start)
+- [Data Pipeline](#data-pipeline)
+- [OGC API Reference](#ogc-api-reference)
+- [WebSocket Protocol](#websocket-protocol)
+- [Azure Deployment](#azure-deployment)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Environment Variables](#environment-variables)
+- [License](#license)
 
 ---
 
-## 🌆 Overview
+## Overview
 
 The **3D Urban Digital Twin** is a full-stack geospatial platform that renders a living, breathing digital replica of a metropolitan study area (Midtown Manhattan, ~2km²). It combines:
 
@@ -46,26 +50,26 @@ The **3D Urban Digital Twin** is a full-stack geospatial platform that renders a
 - **CesiumJS 3D globe** with ESRI World Imagery, building extrusions, NDVI overlays, and cinematic flythrough mode
 - **Azure Cloud deployment** with Blob Storage GeoPackage sync, App Service backend, and Static Web App frontend
 
-This project demonstrates how modern smart-city infrastructure can be built entirely on open standards — OGC features, GeoJSON, WKB geometries, and GeoPackage — without vendor lock-in.
+This project demonstrates how modern smart-city infrastructure can be built entirely on open standards — OGC Features, GeoJSON, WKB geometries, and GeoPackage — without vendor lock-in.
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 | Feature | Description |
 |---|---|
-| 🌍 **3D Cesium Globe** | Google Earth-style navigation with ORBIT, WALK, and FLYTHROUGH camera modes |
-| 🚗 **Live Fleet Tracking** | 20 vehicles (bus, truck, delivery, emergency) moving in real-time via WebSocket |
-| 🏢 **Building Extrusions** | 400+ OSM building footprints colour-coded by use type with construction simulation |
-| 🌿 **NDVI Heatmap Layer** | Normalized Difference Vegetation Index grid rendered as a transparency overlay |
-| 📡 **OGC API Compliant** | Full OGC API – Features Part 1 with pagination, bbox filtering, and GeoJSON responses |
-| ☁️ **Azure Blob Sync** | GeoPackage auto-syncs to Azure Blob Storage on startup and periodically |
-| 🔴 **WebSocket Push** | Server-to-client push for fleet positions and building construction state changes |
-| 🛰️ **Satellite Imagery** | ESRI World Imagery base layer with toggleable overlay controls |
+| **3D Cesium Globe** | Google Earth-style navigation with ORBIT, WALK, and FLYTHROUGH camera modes |
+| **Live Fleet Tracking** | 20 vehicles (bus, truck, delivery, emergency) moving in real-time via WebSocket |
+| **Building Extrusions** | 400+ OSM building footprints colour-coded by use type with construction simulation |
+| **NDVI Heatmap Layer** | Normalized Difference Vegetation Index grid rendered as a transparency overlay |
+| **OGC API Compliant** | Full OGC API – Features Part 1 with pagination, bbox filtering, and GeoJSON responses |
+| **Azure Blob Sync** | GeoPackage auto-syncs to Azure Blob Storage on startup and periodically |
+| **WebSocket Push** | Server-to-client push for fleet positions and building construction state changes |
+| **Satellite Imagery** | ESRI World Imagery base layer with toggleable overlay controls |
 
 ---
 
-## 🏛️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -100,7 +104,7 @@ This project demonstrates how modern smart-city infrastructure can be built enti
   │  │  • buildings  (416 features)    │      │                               │ │
   │  │  • fleet      (20 vehicles)     │      │   azureStorage.js:            │ │
   │  │  • ndvi_grid  (168 cells)       │      │   • download on startup       │ │
-  │  │  • gpkg_geometry_columns        │      │   • upload every 5 min       │ │
+  │  │  • gpkg_geometry_columns        │      │   • upload every 5 min        │ │
   │  │  • gpkg_spatial_ref_sys         │      │                               │ │
   │  └─────────────────────────────────┘      └───────────────────────────────┘ │
   └──────────────────────────────────────────────────────────────────────────────┘
@@ -171,7 +175,7 @@ This project demonstrates how modern smart-city infrastructure can be built enti
 
 ---
 
-## 🔄 System Flow
+## System Flow
 
 ```mermaid
 sequenceDiagram
@@ -205,7 +209,7 @@ sequenceDiagram
 
     Note over WS,FE: Real-time updates loop
     loop Every 3 seconds
-        API->>GPKG: updateFleetPosition() × 20 vehicles
+        API->>GPKG: updateFleetPosition() x 20 vehicles
         API->>WS: broadcast({ type: "fleet_update", features })
         WS-->>FE: WebSocket push
         FE->>CES: Update vehicle marker positions + trails
@@ -227,14 +231,14 @@ sequenceDiagram
 
 ---
 
-## 🔀 Request Flow Diagram
+## Request Flow Diagram
 
 ```mermaid
 flowchart TD
     Client([Browser Client]) -->|HTTP GET| Vite[Vite Dev Server\n:5173]
-    Client -->|WS ws://| WSProxy[Vite WS Proxy\n/ws → :3001]
-    
-    Vite -->|Proxy /api /health| Express[Express.js\n:3001]
+    Client -->|WS ws://| WSProxy[Vite WS Proxy\n/ws → :3002]
+
+    Vite -->|Proxy /api /health| Express[Express.js\n:3002]
     WSProxy --> WSS[WebSocket Server\nws path /ws]
 
     Express --> OGC[OGC Router\n/api/*]
@@ -252,7 +256,7 @@ flowchart TD
     Colls --> DB
 
     WSS --> Clients{Connected\nClients Set}
-    
+
     Fleet[Fleet Simulator\nsetInterval 3s] --> DB
     Fleet --> Broadcast[broadcast fn]
     Broadcast --> Clients
@@ -271,26 +275,26 @@ flowchart TD
 
 ---
 
-## 🗺️ Data Layer Schema
+## Data Layer Schema
 
 ```mermaid
 erDiagram
     BUILDINGS {
-        text   id            PK
-        text   featureId
-        blob   geom          "OGC GeoPackage WKB"
-        real   height
-        text   useType       "residential|commercial|mixed|industrial"
-        text   material
-        text   status        "existing|under_construction|proposed"
-        real   ndvi
-        real   ndbi
-        text   name
-        text   address
+        text    id            PK
+        text    featureId
+        blob    geom          "OGC GeoPackage WKB"
+        real    height
+        text    useType       "residential|commercial|mixed|industrial"
+        text    material
+        text    status        "existing|under_construction|proposed"
+        real    ndvi
+        real    ndbi
+        text    name
+        text    address
         integer floors
         integer yearBuilt
-        real   energyRating
-        text   lastUpdated
+        real    energyRating
+        text    lastUpdated
     }
 
     FLEET {
@@ -317,9 +321,9 @@ erDiagram
     }
 
     GPKG_GEOMETRY_COLUMNS {
-        text   table_name    FK
-        text   column_name
-        text   geometry_type_name
+        text    table_name    FK
+        text    column_name
+        text    geometry_type_name
         integer srs_id
         integer z
         integer m
@@ -338,7 +342,7 @@ erDiagram
 
 ---
 
-## 🧰 Tech Stack
+## Tech Stack
 
 | Layer | Technology | Purpose |
 |---|---|---|
@@ -351,54 +355,54 @@ erDiagram
 | **Database** | `better-sqlite3` | Synchronous GeoPackage read/write |
 | **DB Format** | OGC GeoPackage (SQLite) | Standards-compliant spatial container, WKB geom |
 | **Cloud Storage** | Azure Blob Storage (`@azure/storage-blob`) | GeoPackage sync / persistence |
-| **Hosting** | Azure App Service (backend) + Azure Static Web Apps (frontend) | Production deployment |
+| **Hosting** | Azure App Service + Azure Static Web Apps | Production deployment |
 | **CI/CD** | GitHub Actions | Automated deploy on push to `main` |
 | **Data Pipeline** | Python 3 + SQLite + Requests | OSM ingestion, NDVI computation, GeoPackage seeding |
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 3D-Urban-Digital-Twin/
 │
-├── 📂 backend/                        # Node.js OGC API server
+├── backend/                           # Node.js OGC API server
 │   ├── server.js                      # Express + WebSocket server entry point
 │   ├── package.json
 │   ├── web.config                     # Azure IIS node configuration
 │   │
-│   ├── 📂 routes/
+│   ├── routes/
 │   │   └── ogc.js                     # OGC API – Features router (all endpoints)
 │   │
-│   ├── 📂 db/
+│   ├── db/
 │   │   ├── database.js                # better-sqlite3 wrapper, GeoPackage queries
 │   │   └── seed.js                    # Mock data seeder (Node.js, quick start)
 │   │
-│   ├── 📂 workers/
+│   ├── workers/
 │   │   ├── fleetSimulator.js          # Vehicle movement engine (3s interval)
 │   │   └── buildingUpdater.js         # Construction state engine (45s interval)
 │   │
-│   ├── 📂 utils/
+│   ├── utils/
 │   │   └── azureStorage.js            # Azure Blob upload/download sync
 │   │
-│   ├── 📂 middleware/
+│   ├── middleware/
 │   │   └── logger.js                  # HTTP request logger
 │   │
-│   └── 📂 data/
+│   └── data/
 │       └── urban_twin.gpkg            # GeoPackage database (git-ignored)
 │
-├── 📂 frontend/                       # React + Vite SPA
+├── frontend/                          # React + Vite SPA
 │   ├── index.html                     # App shell
 │   ├── vite.config.js                 # Vite config + dev proxy
 │   ├── package.json
 │   │
-│   └── 📂 src/
+│   └── src/
 │       ├── App.jsx                    # Root component, state orchestration
 │       ├── main.jsx                   # React entry point
 │       ├── index.css                  # Design system (CSS variables, animations)
 │       │
-│       ├── 📂 components/
-│       │   ├── CesiumMap3D.jsx        # 3D globe renderer (Cesium, 679 lines)
+│       ├── components/
+│       │   ├── CesiumMap3D.jsx        # 3D globe renderer (Cesium)
 │       │   ├── Map3D.jsx              # MapLibre fallback renderer
 │       │   ├── StatsBar.jsx           # Top stats strip (buildings, vehicles, status)
 │       │   ├── Sidebar.jsx            # Collapsible side panel shell
@@ -406,22 +410,22 @@ erDiagram
 │       │   ├── FleetPanel.jsx         # Live vehicle list panel
 │       │   └── BuildingPopup.jsx      # Building detail overlay
 │       │
-│       ├── 📂 hooks/
+│       ├── hooks/
 │       │   ├── useLiveUpdates.js      # WebSocket hook (auto-reconnect, state patch)
 │       │   └── useOGCData.js          # OGC API fetch hook (loading, error, data)
 │       │
-│       └── 📂 utils/
+│       └── utils/
 │           ├── mapConfig.js           # Bounding box, city centre constants
 │           └── apiConfig.js           # API base URL helper (env-aware)
 │
-├── 📂 data-pipeline/                  # Python geospatial processing
+├── data-pipeline/                     # Python geospatial processing
 │   ├── overpass_fetch.py              # Fetch OSM building footprints via Overpass
 │   ├── seed_gpkg.py                   # Seed OGC GeoPackage from OSM data
 │   ├── compute_indices.py             # Compute NDVI / NDBI raster indices
 │   └── requirements.txt
 │
-├── 📂 .github/
-│   └── 📂 workflows/
+├── .github/
+│   └── workflows/
 │       ├── deploy-backend.yml         # CI/CD: Azure App Service
 │       └── deploy-frontend.yml        # CI/CD: Azure Static Web Apps
 │
@@ -432,11 +436,11 @@ erDiagram
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
-| Tool | Version | Install |
+| Tool | Version | Notes |
 |---|---|---|
 | Node.js | 18+ | [nodejs.org](https://nodejs.org/) |
 | npm | 9+ | Bundled with Node.js |
@@ -457,21 +461,22 @@ npm install
 npm run seed        # generates backend/data/urban_twin.gpkg
 ```
 
-> The seed script creates **416 buildings**, **20 fleet vehicles**, and **168 NDVI grid cells** using deterministic mock data (no external API calls required).
+> The seed script creates **416 buildings**, **20 fleet vehicles**, and **168 NDVI grid cells** using deterministic mock data — no external API calls required.
 
 ### 3 · Start the backend
 
 ```bash
 # still inside /backend
-npm run dev         # starts on http://localhost:3001
+npm run dev         # starts on http://localhost:3002
 ```
 
-Verify with:
+Verify the server is running:
+
 ```bash
-curl http://localhost:3001/health
+curl http://localhost:3002/health
 # → {"status":"ok","uptime":...}
 
-curl http://localhost:3001/api/collections
+curl http://localhost:3002/api/collections
 # → OGC FeatureCollection list
 ```
 
@@ -483,13 +488,13 @@ npm install
 npm run dev         # starts on http://localhost:5173
 ```
 
-Open **http://localhost:5173** — the Vite dev server proxies `/api`, `/health`, and `/ws` to the backend automatically.
+Open **http://localhost:5173** — the Vite dev server proxies `/api`, `/health`, and `/ws` to the backend on port 3002 automatically.
 
 ---
 
-## 🗄️ Data Pipeline
+## Data Pipeline
 
-The Python data pipeline in `data-pipeline/` provides optional real-world OSM data ingestion.
+The Python data pipeline in `data-pipeline/` provides optional real-world OSM data ingestion as an alternative to the Node.js seed script.
 
 ### Pipeline Overview
 
@@ -512,7 +517,7 @@ pip install -r requirements.txt
 # Step 1: Fetch OSM buildings (cached after first run)
 python overpass_fetch.py --bbox "40.735,-73.995,40.760,-73.975"
 
-# Step 2: Compute vegetation indices (optional, uses Sentinel-2 data)
+# Step 2: Compute vegetation indices (optional, requires Sentinel-2 data)
 python compute_indices.py
 
 # Step 3: Seed the GeoPackage
@@ -524,15 +529,15 @@ python seed_gpkg.py
 
 ---
 
-## 📡 OGC API Reference
+## OGC API Reference
 
 The backend implements **OGC API – Features Part 1: Core**, conformance class `http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core`.
 
 ### Base URL
 
 ```
-http://localhost:3001/api          (local dev)
-https://<your-app>.azurewebsites.net/api   (Azure)
+http://localhost:3002/api                              (local dev)
+https://<your-app>.azurewebsites.net/api               (Azure)
 ```
 
 ### Endpoints
@@ -559,19 +564,19 @@ https://<your-app>.azurewebsites.net/api   (Azure)
 
 ```bash
 # Get all buildings in a bounding box
-curl "http://localhost:3001/api/collections/buildings/items?bbox=-73.99,40.74,-73.97,40.76&limit=100"
+curl "http://localhost:3002/api/collections/buildings/items?bbox=-73.99,40.74,-73.97,40.76&limit=100"
 
 # Get a single building by ID
-curl "http://localhost:3001/api/collections/buildings/items/bldg-001"
+curl "http://localhost:3002/api/collections/buildings/items/bldg-001"
 
 # Get fleet positions
-curl "http://localhost:3001/api/collections/fleet/items"
+curl "http://localhost:3002/api/collections/fleet/items"
 
 # Get NDVI grid
-curl "http://localhost:3001/api/collections/ndvi_grid/items?limit=200"
+curl "http://localhost:3002/api/collections/ndvi_grid/items?limit=200"
 ```
 
-### Example Response (single building feature)
+### Example Response — single building feature
 
 ```json
 {
@@ -579,7 +584,7 @@ curl "http://localhost:3001/api/collections/ndvi_grid/items?limit=200"
   "id": "bldg-042",
   "geometry": {
     "type": "Polygon",
-    "coordinates": [[[-73.9867, 40.7491], [-73.9865, 40.7491], ...]]
+    "coordinates": [[[-73.9867, 40.7491], [-73.9865, 40.7491], "..."]]
   },
   "properties": {
     "featureId": "bldg-042",
@@ -594,28 +599,30 @@ curl "http://localhost:3001/api/collections/ndvi_grid/items?limit=200"
     "lastUpdated": "2026-06-22T14:00:00Z"
   },
   "links": [
-    { "href": "http://localhost:3001/api/collections/buildings/items/bldg-042", "rel": "self" },
-    { "href": "http://localhost:3001/api/collections/buildings", "rel": "collection" }
+    { "href": "http://localhost:3002/api/collections/buildings/items/bldg-042", "rel": "self" },
+    { "href": "http://localhost:3002/api/collections/buildings", "rel": "collection" }
   ]
 }
 ```
 
 ---
 
-## 🔌 WebSocket Protocol
+## WebSocket Protocol
 
-Connect to `ws://localhost:3001/ws` (or `wss://<host>/ws` in production).
+Connect to `ws://localhost:3002/ws` (or `wss://<host>/ws` in production).
 
 ### Connection handshake
 
-On connect, the server sends:
+On connect, the server immediately sends:
+
 ```json
 { "type": "connected", "message": "Urban Twin WS ready" }
 ```
 
 ### Message Types
 
-#### `fleet_update` — emitted every 3 seconds
+#### `fleet_update` — broadcast every 3 seconds
+
 ```json
 {
   "type": "fleet_update",
@@ -638,7 +645,8 @@ On connect, the server sends:
 }
 ```
 
-#### `building_update` — emitted every 45 seconds
+#### `building_update` — broadcast every 45 seconds
+
 ```json
 {
   "type": "building_update",
@@ -647,7 +655,7 @@ On connect, the server sends:
     {
       "type": "Feature",
       "id": "bldg-007",
-      "geometry": { "type": "Polygon", "coordinates": [[...]] },
+      "geometry": { "type": "Polygon", "coordinates": [[]] },
       "properties": {
         "featureId": "bldg-007",
         "height": 87.0,
@@ -662,16 +670,17 @@ On connect, the server sends:
 ### Client-side reconnect logic
 
 The `useLiveUpdates` hook implements exponential backoff reconnection:
-- Initial delay: 1s → 2s → 4s → 8s … (capped at 30s)
-- Automatically patches `buildings` state using a `Map`-based feature merge (no full re-render)
+
+- Reconnect delays: 1s → 2s → 4s → 8s … (capped at 30s)
+- Buildings state is patched using a `Map`-based feature merge — no full re-render on updates
 
 ---
 
-## ☁️ Azure Deployment
+## Azure Deployment
 
 The project deploys to two Azure services with full CI/CD via GitHub Actions.
 
-### Architecture on Azure
+### Azure Architecture
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -703,23 +712,23 @@ The project deploys to two Azure services with full CI/CD via GitHub Actions.
 
 ### Step-by-step deployment
 
-See [**azure_deployment_guide.md**](./azure_deployment_guide.md) for the full step-by-step guide including screenshots and troubleshooting.
+See [**azure_deployment_guide.md**](./azure_deployment_guide.md) for the full walkthrough including screenshots and troubleshooting notes.
 
-**TL;DR:**
+**Summary:**
 
 ```
 1. Create Azure App Service (Node 22, Linux, B1+)
 2. Enable WebSockets in App Service → Configuration → General settings
-3. Set environment variables on App Service:
+3. Set environment variable on App Service:
    AZURE_STORAGE_CONNECTION_STRING = <your blob connection string>
 4. Create Azure Static Web App linked to this repo
-5. Push secrets to GitHub (see CI/CD section below)
-6. Push to main → GitHub Actions deploys both services automatically
+5. Add GitHub Secrets (see table below)
+6. Push to main — GitHub Actions deploys both services automatically
 ```
 
 ---
 
-## ⚙️ CI/CD Pipeline
+## CI/CD Pipeline
 
 ```mermaid
 flowchart TD
@@ -743,7 +752,7 @@ flowchart TD
 
 ### Required GitHub Secrets
 
-| Secret | Used by | Description |
+| Secret | Workflow | Description |
 |---|---|---|
 | `AZURE_WEBAPP_NAME` | `deploy-backend.yml` | App Service name (e.g. `3d-urban-twin-backend`) |
 | `AZURE_WEBAPP_PUBLISH_PROFILE` | `deploy-backend.yml` | Download from App Service → Get publish profile |
@@ -753,26 +762,26 @@ flowchart TD
 
 ---
 
-## 🔑 Environment Variables
+## Environment Variables
 
 ### Backend (`backend/`)
 
 | Variable | Required | Description |
 |---|---|---|
-| `PORT` | No | HTTP port (default: `3001`) |
-| `AZURE_STORAGE_CONNECTION_STRING` | No | Azure Blob Storage connection string. If unset, Blob sync is skipped and local `data/urban_twin.gpkg` is used. |
+| `PORT` | No | HTTP port (default: `3002`) |
+| `AZURE_STORAGE_CONNECTION_STRING` | No | Azure Blob Storage connection string. If unset, Blob sync is skipped and the local `data/urban_twin.gpkg` is used. |
 
 ### Frontend (`frontend/`)
 
 | Variable | Local Default | Production |
 |---|---|---|
-| `VITE_API_BASE_URL` | *(empty, uses Vite proxy)* | `https://<backend>.azurewebsites.net` |
-| `VITE_WS_BASE_URL` | *(empty, uses Vite proxy)* | `wss://<backend>.azurewebsites.net` |
-| `VITE_CESIUM_ION_TOKEN` | *(empty, no Cesium ion assets)* | Your [Cesium ion](https://ion.cesium.com/) token for premium terrain/imagery |
+| `VITE_API_BASE_URL` | *(empty — uses Vite proxy)* | `https://<backend>.azurewebsites.net` |
+| `VITE_WS_BASE_URL` | *(empty — uses Vite proxy)* | `wss://<backend>.azurewebsites.net` |
+| `VITE_CESIUM_ION_TOKEN` | *(empty — no Cesium ion assets)* | Your [Cesium ion](https://ion.cesium.com/) access token for premium terrain and imagery |
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the **MIT License** — see [LICENSE](./LICENSE) for details.
 
@@ -780,8 +789,11 @@ This project is licensed under the **MIT License** — see [LICENSE](./LICENSE) 
 
 <div align="center">
 
-Built with ❤️ using open geospatial standards
+Built on open geospatial standards
 
-**OGC API · GeoPackage · GeoJSON · CesiumJS · WebSocket**
+[![OGC](https://img.shields.io/badge/Standard-OGC_API_Features-005571?style=flat-square)](https://ogcapi.ogc.org/features/)
+[![GeoPackage](https://img.shields.io/badge/Format-GeoPackage-005571?style=flat-square)](https://www.geopackage.org/)
+[![GeoJSON](https://img.shields.io/badge/Format-GeoJSON-333333?style=flat-square)](https://geojson.org/)
+[![CesiumJS](https://img.shields.io/badge/Renderer-CesiumJS-48B5C4?style=flat-square)](https://cesium.com/)
 
 </div>
