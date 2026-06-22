@@ -1,4 +1,4 @@
-// Shared API / WebSocket base URLs for dev (Vite proxy) and production (Azure SWA proxy)
+// Shared API / WebSocket base URLs for dev (Vite proxy) and production (Azure SWA)
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
 const WS_BASE = import.meta.env.VITE_WS_BASE_URL || ''
