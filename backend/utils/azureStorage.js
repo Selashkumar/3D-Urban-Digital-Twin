@@ -70,23 +70,23 @@ async function downloadDatabaseFromBlob() {
   }
 }
 
-// Debounce timer for uploads
-let uploadTimeout = null
+// Flag to track if the database has local modifications
+let dbModified = false
 
 /**
- * Schedules an upload of the local GeoPackage back to Azure Blob Storage,
- * debounced to avoid overloading the API on rapid database modifications.
+ * Marks that local database updates have occurred and need to be synced.
  */
 function scheduleDatabaseUpload() {
-  if (!blobClient) return
+  dbModified = true
+}
 
-  if (uploadTimeout) {
-    clearTimeout(uploadTimeout)
-  }
+// Start a periodic sync worker (every 20 seconds) if cloud storage is configured
+if (connectionString) {
+  setInterval(async () => {
+    if (!dbModified || !blobClient) return
 
-  // Debounce by 12 seconds to bundle rapid simulation updates
-  uploadTimeout = setTimeout(async () => {
     try {
+      dbModified = false // Reset immediately before upload to catch new writes during upload
       console.log('[Azure Storage] Uploading updated GeoPackage to Azure Blob Storage...')
       
       const containerExists = await containerClient.exists()
@@ -99,8 +99,9 @@ function scheduleDatabaseUpload() {
       console.log('✅ [Azure Storage] Successfully uploaded local updates to Azure Blob Storage.')
     } catch (error) {
       console.error('❌ [Azure Storage] Periodic upload failed:', error.message)
+      dbModified = true // Retry on next tick
     }
-  }, 12000)
+  }, 20000) // Sync every 20 seconds
 }
 
 module.exports = {
