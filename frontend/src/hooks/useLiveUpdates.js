@@ -4,7 +4,7 @@ import { wsUrl } from '../utils/apiConfig'
 const INITIAL_BACKOFF = 1000
 const MAX_BACKOFF = 30_000
 
-export function useLiveUpdates() {
+export function useLiveUpdates(enabled = true) {
   const [status, setStatus] = useState('connecting')
   const [lastFleetUpdate, setLastFleetUpdate] = useState(null)
   const [lastBuildingUpdate, setLastBuildingUpdate] = useState(null)
@@ -69,6 +69,15 @@ export function useLiveUpdates() {
   }, [])
 
   useEffect(() => {
+    if (!enabled) {
+      setStatus('disconnected')
+      if (wsRef.current) {
+        wsRef.current.close(1000, 'disabled by user')
+        wsRef.current = null
+      }
+      return
+    }
+
     mountedRef.current = true
     connect()
 
@@ -80,7 +89,7 @@ export function useLiveUpdates() {
         wsRef.current = null
       }
     }
-  }, [connect])
+  }, [connect, enabled])
 
   return { status, lastFleetUpdate, lastBuildingUpdate }
 }

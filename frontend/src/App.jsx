@@ -17,8 +17,9 @@ function App() {
     imagery: 'esri',
   })
   const [backendStatus, setBackendStatus] = useState('checking')
+  const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(true)
 
-  const { status: wsStatus, lastFleetUpdate, lastBuildingUpdate } = useLiveUpdates()
+  const { status: wsStatus, lastFleetUpdate, lastBuildingUpdate } = useLiveUpdates(liveUpdatesEnabled)
   const { data: buildingsData, loading: buildingsLoading } = useOGCData('buildings', {
     bbox: CITY_BBOX,
     limit: 500,
@@ -85,6 +86,8 @@ function App() {
           layerVisibility={layerVisibility}
           onLayerVisibilityChange={setLayerVisibility}
           fleetData={liveFleetData}
+          liveUpdatesEnabled={liveUpdatesEnabled}
+          onLiveUpdatesToggle={setLiveUpdatesEnabled}
         />
 
         <div className="map-wrapper">

@@ -4,12 +4,13 @@
 
 import { useMemo } from 'react'
 import { FLEET_TYPE_COLORS } from '../utils/mapConfig'
+import { TruckIcon, BusIcon, EmergencyIcon, DeliveryIcon, CarIcon } from './Icons'
 
 const VEHICLE_ICONS = {
-  truck:     '🚚',
-  bus:       '🚌',
-  emergency: '🚨',
-  delivery:  '📦',
+  truck:     TruckIcon,
+  bus:       BusIcon,
+  emergency: EmergencyIcon,
+  delivery:  DeliveryIcon,
 }
 
 const STATUS_LABELS = {
@@ -44,7 +45,7 @@ export default function FleetPanel({ fleetData }) {
           gap: 8,
           flexDirection: 'column',
         }}>
-          <span style={{ fontSize: 24 }}>🚗</span>
+          <CarIcon size={24} style={{ color: 'var(--text-muted)' }} />
           <span>No fleet data</span>
           <span style={{ fontSize: 10 }}>Backend may be loading...</span>
         </div>
@@ -100,7 +101,7 @@ function VehicleRow({ vehicle }) {
   const props = vehicle.properties || {}
   const isMoving = props.status === 'moving'
   const color = FLEET_TYPE_COLORS[props.type] || FLEET_TYPE_COLORS.default
-  const icon = VEHICLE_ICONS[props.type] || '🚗'
+  const IconComp = VEHICLE_ICONS[props.type] || CarIcon
   const statusInfo = STATUS_LABELS[props.status] || { label: props.status, color: 'var(--text-muted)' }
 
   // coords from the GeoJSON geometry
@@ -121,7 +122,9 @@ function VehicleRow({ vehicle }) {
       }}
     >
       {/* type icon */}
-      <span style={{ fontSize: 16, flexShrink: 0 }}>{icon}</span>
+      <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+        <IconComp size={16} style={{ color }} />
+      </span>
 
       {/* id + position */}
       <div style={{ flex: 1, minWidth: 0 }}>
