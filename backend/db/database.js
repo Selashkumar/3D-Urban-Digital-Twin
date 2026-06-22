@@ -180,10 +180,13 @@ const getBuildingById = (id) => {
   return getDb().prepare('SELECT * FROM buildings WHERE id = ?').get(id)
 }
 
+const { scheduleDatabaseUpload } = require('../utils/azureStorage')
+
 const updateBuildingStatus = (id, status, height) => {
   getDb()
     .prepare('UPDATE buildings SET status = ?, height = ?, floors = ? WHERE id = ?')
     .run(status, height, Math.round(height / 3.5), id)
+  scheduleDatabaseUpload()
 }
 
 // ─── Fleet ────────────────────────────────────────────────────────────────────
@@ -221,6 +224,7 @@ const updateFleetPosition = (id, lon, lat, heading, speed, timestamp) => {
               SET minx = ?, maxx = ?, miny = ?, maxy = ?
               WHERE id = ?`)
     .run(lon, lon, lat, lat, id)
+  scheduleDatabaseUpload()
 }
 
 // ─── NDVI Grid ────────────────────────────────────────────────────────────────

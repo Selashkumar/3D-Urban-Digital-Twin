@@ -44,6 +44,18 @@ export default function LayerControls({
           icon="🚗"
           onToggle={() => handleToggle('fleet')}
         />
+        <LayerToggleRow
+          label="Sentinel-2 Imagery"
+          active={layerVisibility.imagery === 'sentinel'}
+          accent="var(--accent-purple)"
+          icon="🛰️"
+          onToggle={() => {
+            onLayerVisibilityChange({
+              ...layerVisibility,
+              imagery: layerVisibility.imagery === 'sentinel' ? 'esri' : 'sentinel',
+            })
+          }}
+        />
       </div>
 
       <div className="divider" style={{ marginTop: 16 }} />

@@ -11,7 +11,7 @@
   - FLYTHROUGH: cinematic automated tour of city landmarks
 */
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { apiUrl } from '../utils/apiConfig'
 
 // ── Cesium ion token ─────────────────────────────────────────────────────────
@@ -152,6 +152,7 @@ export default function CesiumMap3D({
   lastBuildingUpdate,
   selectedBuilding,
 }) {
+  const [mapLoaded, setMapLoaded] = useState(false)
   const containerRef   = useRef(null)
   const viewerRef      = useRef(null)
   const CesiumRef      = useRef(null)  // window.Cesium once loaded
@@ -354,6 +355,8 @@ export default function CesiumMap3D({
       // ── Load data ──────────────────────────────────────────────────────
       fetchBuildings(viewer, Cesium)
       fetchFleet(viewer, Cesium)
+
+      setMapLoaded(true)
 
     }).catch(err => console.error('[CesiumMap3D] Failed to load Cesium:', err))
 
@@ -561,6 +564,34 @@ export default function CesiumMap3D({
       tilesetRef.current.show = sb
     }
   }, [layerVisibility])
+
+  // ── Satellite Imagery Layer Toggle ─────────────────────────────────────────
+  useEffect(() => {
+    const viewer = viewerRef.current
+    const Cesium = CesiumRef.current
+    if (!mapLoaded || !viewer || !Cesium) return
+
+    viewer.imageryLayers.removeAll()
+
+    const isSentinel = layerVisibility?.imagery === 'sentinel'
+    const providerUrl = isSentinel
+      ? 'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg'
+      : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+
+    const creditText = isSentinel
+      ? 'Sentinel-2 Cloudless © EOX IT Services GmbH (Contains modified Copernicus Sentinel data)'
+      : 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+
+    const maxLevel = isSentinel ? 14 : 19
+
+    const provider = new Cesium.UrlTemplateImageryProvider({
+      url: providerUrl,
+      credit: creditText,
+      maximumLevel: maxLevel,
+    })
+
+    viewer.imageryLayers.addImageryProvider(provider)
+  }, [mapLoaded, layerVisibility?.imagery])
 
   // ── Highlight selected building ────────────────────────────────────────────
   useEffect(() => {

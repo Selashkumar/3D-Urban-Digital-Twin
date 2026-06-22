@@ -11,14 +11,7 @@ const fs = require('fs')
 
 const logger = require('./middleware/logger')
 
-// check if the db is seeded before we try to boot - nothing is more confusing
-// than a cryptic better-sqlite3 error when the file just doesn't exist
-const dbPath = path.join(__dirname, 'data', 'urban_twin.gpkg')
-if (!fs.existsSync(dbPath)) {
-  console.error('\n  ❌  Database not found at:', dbPath)
-  console.error('  Run `npm run seed` first to generate the mock data.\n')
-  process.exit(1)
-}
+// Database checking is handled asynchronously in startServer()
 
 const app = express()
 const server = http.createServer(app)
@@ -112,20 +105,39 @@ const broadcast = (data) => {
 
 // start up the simulation workers - pass broadcast so they can push updates
 // doing this after server setup so the db is definitely accessible
-const { startFleetSimulator } = require('./workers/fleetSimulator')
-// const { startBuildingUpdater } = require('./workers/buildingUpdater')
+const { downloadDatabaseFromBlob } = require('./utils/azureStorage')
 
-startFleetSimulator(broadcast)
-// startBuildingUpdater(broadcast)
+async function startServer() {
+  // Sync database from Blob Storage if configured
+  await downloadDatabaseFromBlob()
 
-const PORT = process.env.PORT || 3001
+  const dbPath = path.join(__dirname, 'data', 'urban_twin.gpkg')
+  if (!fs.existsSync(dbPath)) {
+    console.error('\n  ❌  Database not found at:', dbPath)
+    console.error('  Run `npm run seed` first to generate the mock data.\n')
+    process.exit(1)
+  }
 
-server.listen(PORT, () => {
-  console.log(`\n  🏙️  Urban Twin API running`)
-  console.log(`  HTTP:  http://localhost:${PORT}`)
-  console.log(`  WS:    ws://localhost:${PORT}/ws`)
-  console.log(`  OGC:   http://localhost:${PORT}/api`)
-  console.log(`\n  Workers: fleet simulator (3s) [building updater commented out]\n`)
+  const { startFleetSimulator } = require('./workers/fleetSimulator')
+  const { startBuildingUpdater } = require('./workers/buildingUpdater')
+
+  startFleetSimulator(broadcast)
+  startBuildingUpdater(broadcast)
+
+  const PORT = process.env.PORT || 3001
+
+  server.listen(PORT, () => {
+    console.log(`\n  🏙️  Urban Twin API running`)
+    console.log(`  HTTP:  http://localhost:${PORT}`)
+    console.log(`  WS:    ws://localhost:${PORT}/ws`)
+    console.log(`  OGC:   http://localhost:${PORT}/api`)
+    console.log(`\n  Workers: fleet simulator (3s) and building simulator (10s) running\n`)
+  })
+}
+
+startServer().catch(err => {
+  console.error('Fatal startup error:', err)
+  process.exit(1)
 })
 
 module.exports = { broadcast }

@@ -14,6 +14,7 @@ function App() {
   const [layerVisibility, setLayerVisibility] = useState({
     buildings: true,
     fleet: true,
+    imagery: 'esri',
   })
   const [backendStatus, setBackendStatus] = useState('checking')
 
