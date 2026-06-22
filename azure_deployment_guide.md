@@ -181,3 +181,32 @@ To allow your compiled frontend to connect to the backend APIs and WebSocket str
 3. Once completed, your static site will be live at the auto-generated URL shown on the Static Web App's Overview page (e.g., `https://random-word-12345.azurestaticapps.net`).
 
 You are now fully hosted on Azure with a complete, clean CI/CD automated pipeline!
+
+---
+
+## 🗄️ Phase 6: Configuring Azure Blob Storage Sync (Production Storage)
+
+To satisfy the requirement of hosting the production GeoPackage on Azure Blob Storage, the backend includes a hybrid sync layer that downloads the latest `.gpkg` file on boot, writes updates to the local filesystem (fast WAL database operations), and automatically persists changes back to Azure Blob Storage on a debounced schedule.
+
+### Step 6.1: Create an Azure Storage Container
+1. Log in to the [Azure Portal](https://portal.azure.com) and search for **Storage accounts**.
+2. Click **Create** to create a new storage account (e.g. `urbantwinstorage`).
+3. Select your Resource Group, name it, and choose a region (preferably matching your Web App). Keep options default and click **Review + Create** -> **Create**.
+4. Once deployed, open the Storage Account and click on **Containers** in the left navigation panel under *Data storage*.
+5. Click **+ Container**, name it `geopackage`, set public access level to **Private (no anonymous access)** or **Blob**, and click **Create**.
+
+### Step 6.2: Retrieve the Connection String
+1. Inside your Storage Account, scroll down to the **Security + networking** section in the left menu.
+2. Click on **Access keys**.
+3. Click **Show** under Key 1, then copy the **Connection string** (it starts with `DefaultEndpointsProtocol=https;AccountName=...`).
+
+### Step 6.3: Add Environment Variable on Azure App Service
+1. Go to your **Azure App Service Web App** resource page.
+2. In the left menu under **Settings**, select **Configuration** (or **Environment variables**).
+3. Click **+ New application setting** (or **Add**):
+   * **Name**: `AZURE_STORAGE_CONNECTION_STRING`
+   * **Value**: Paste the full storage account connection string you copied in Step 6.2.
+4. Click **Save** and **Continue** to restart the Web App.
+
+*The Node.js backend will now download the `urban_twin.gpkg` blob from your storage container on boot (creating it from your local copy if it's the first run) and push debounced updates back to the cloud as simulations progress.*
+
