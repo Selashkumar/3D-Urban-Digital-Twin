@@ -20,11 +20,14 @@ export function useLiveUpdates(enabled = true) {
     clearTimeout(reconnectTimerRef.current)
     setStatus('connecting')
 
-    const ws = new WebSocket(wsUrl('/ws'))
+    const url = wsUrl('/ws')
+    console.log(`Connecting to WebSocket at: ${url}`)
+    const ws = new WebSocket(url)
     wsRef.current = ws
 
     ws.onopen = () => {
       if (!mountedRef.current) return
+      console.log(`WebSocket connected successfully to: ${url}`)
       setStatus('connected')
       backoffRef.current = INITIAL_BACKOFF
     }
@@ -53,8 +56,9 @@ export function useLiveUpdates(enabled = true) {
       }
     }
 
-    ws.onclose = () => {
+    ws.onclose = (event) => {
       if (!mountedRef.current) return
+      console.log(`WebSocket disconnected from: ${url}. Code: ${event.code}, Reason: ${event.reason || 'none'}`)
       setStatus('disconnected')
 
       reconnectTimerRef.current = setTimeout(() => {
@@ -63,8 +67,8 @@ export function useLiveUpdates(enabled = true) {
       }, backoffRef.current)
     }
 
-    ws.onerror = () => {
-      // onclose handles reconnect
+    ws.onerror = (err) => {
+      console.error(`WebSocket error for URL ${url}:`, err)
     }
   }, [])
 

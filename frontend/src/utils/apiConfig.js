@@ -15,6 +15,13 @@ export function wsUrl(path = '/ws') {
     return `${WS_BASE}${normalized}`
   }
 
+  // If API_BASE is set, derive the WS URL from it
+  if (API_BASE) {
+    const wsProtocol = API_BASE.startsWith('https:') ? 'wss:' : 'ws:'
+    const cleanHostAndPath = API_BASE.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+    return `${wsProtocol}//${cleanHostAndPath}${normalized}`
+  }
+
   // dev fallback to bypass flaky vite websocket proxy
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return `ws://${window.location.hostname}:3002${normalized}`
