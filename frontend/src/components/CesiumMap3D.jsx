@@ -151,6 +151,7 @@ export default function CesiumMap3D({
   lastFleetUpdate,
   lastBuildingUpdate,
   selectedBuilding,
+  buildingInteractionEnabled,
 }) {
   const [mapLoaded, setMapLoaded] = useState(false)
   const containerRef   = useRef(null)
@@ -162,6 +163,11 @@ export default function CesiumMap3D({
   const tilesetRef     = useRef(null)
   const selectedEntityRef = useRef(null)
   const googleTilesLoadedRef = useRef(false)
+
+  const buildingInteractionEnabledRef = useRef(buildingInteractionEnabled)
+  useEffect(() => {
+    buildingInteractionEnabledRef.current = buildingInteractionEnabled
+  }, [buildingInteractionEnabled])
 
   // ── INIT ───────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -294,6 +300,7 @@ export default function CesiumMap3D({
       // ── Click: select building ─────────────────────────────────────────
       const clickHandler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
       clickHandler.setInputAction(e => {
+        if (!buildingInteractionEnabledRef.current) return
         const picked = viewer.scene.pick(e.position)
         
         // 1. If we clicked one of our floating landmark labels

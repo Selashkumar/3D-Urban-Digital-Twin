@@ -18,6 +18,7 @@ function App() {
   })
   const [backendStatus, setBackendStatus] = useState('checking')
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(false)
+  const [buildingInteractionEnabled, setBuildingInteractionEnabled] = useState(false)
 
   const { status: wsStatus, lastFleetUpdate, lastBuildingUpdate } = useLiveUpdates(liveUpdatesEnabled)
   const { data: buildingsData, loading: buildingsLoading } = useOGCData('buildings', {
@@ -88,6 +89,8 @@ function App() {
           fleetData={liveFleetData}
           liveUpdatesEnabled={liveUpdatesEnabled}
           onLiveUpdatesToggle={setLiveUpdatesEnabled}
+          buildingInteractionEnabled={buildingInteractionEnabled}
+          onBuildingInteractionToggle={setBuildingInteractionEnabled}
         />
 
         <div className="map-wrapper">
@@ -98,10 +101,11 @@ function App() {
             lastFleetUpdate={lastFleetUpdate}
             lastBuildingUpdate={lastBuildingUpdate}
             selectedBuilding={selectedBuilding}
+            buildingInteractionEnabled={buildingInteractionEnabled}
           />
 
           {/* ── Building Detail Popup ── */}
-          {selectedBuilding && (
+          {buildingInteractionEnabled && selectedBuilding && (
             <BuildingPopup
               feature={selectedBuilding}
               onClose={() => setSelectedBuilding(null)}

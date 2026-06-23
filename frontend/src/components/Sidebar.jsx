@@ -12,6 +12,8 @@ export default function Sidebar({
   fleetData,
   liveUpdatesEnabled,
   onLiveUpdatesToggle,
+  buildingInteractionEnabled,
+  onBuildingInteractionToggle,
 }) {
   const statusColor = wsStatus === 'connected' ? 'var(--accent-green)' :
                       wsStatus === 'connecting' ? 'var(--accent-orange)' : 'var(--accent-red)'
@@ -36,22 +38,40 @@ export default function Sidebar({
           <button className="close-btn" onClick={() => setIsOpen(false)}>✕</button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px', marginBottom: 16 }}>
-          <div className="connection-badge" style={{ borderColor: statusColor, margin: 0 }}>
-            <span className="pulse-dot" style={{ backgroundColor: statusColor }}></span>
-            <span className="status-text">{wsStatus.toUpperCase()}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 4px', marginBottom: 16 }}>
+          {/* Status & Live Sync Row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div className="connection-badge" style={{ borderColor: statusColor, margin: 0 }}>
+              <span className="pulse-dot" style={{ backgroundColor: statusColor }}></span>
+              <span className="status-text">{wsStatus.toUpperCase()}</span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Live Sync</span>
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={liveUpdatesEnabled}
+                  onChange={(e) => onLiveUpdatesToggle(e.target.checked)}
+                />
+                <span className="toggle-track" />
+              </label>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Live Sync</span>
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={liveUpdatesEnabled}
-                onChange={(e) => onLiveUpdatesToggle(e.target.checked)}
-              />
-              <span className="toggle-track" />
-            </label>
+          {/* Building Interaction Info Toggle Row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Building Info</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={buildingInteractionEnabled}
+                  onChange={(e) => onBuildingInteractionToggle(e.target.checked)}
+                />
+                <span className="toggle-track" />
+              </label>
+            </div>
           </div>
         </div>
 
