@@ -415,9 +415,11 @@ const CesiumMap3D = memo(function CesiumMap3D({
       })
 
       // ── Load data ──────────────────────────────────────────────────────
+      const initialShowBuildings = layerVisibility?.buildings !== false
+      const initialShowFleet = layerVisibility?.fleet !== false
       Promise.all([
-        fetchBuildings(viewer, Cesium),
-        fetchFleet(viewer, Cesium),
+        fetchBuildings(viewer, Cesium, initialShowBuildings),
+        fetchFleet(viewer, Cesium, initialShowFleet),
         tilesetLoadPromise
       ]).then(() => {
         if (!cancelled) {
@@ -443,7 +445,7 @@ const CesiumMap3D = memo(function CesiumMap3D({
     }
   }, [])
 
-  async function fetchBuildings(viewer, Cesium) {
+  async function fetchBuildings(viewer, Cesium, showInitial) {
     try {
       const res = await fetch(apiUrl('/api/collections/buildings/items?bbox=-74.02,40.70,-73.93,40.78&limit=500'))
       if (!res.ok) return
@@ -469,6 +471,7 @@ const CesiumMap3D = memo(function CesiumMap3D({
         const pos = ring.map(([lon, lat]) => Cesium.Cartesian3.fromDegrees(lon, lat, 0.5))
 
         const entityConfig = {
+          show: showInitial,
           position: Cesium.Cartesian3.fromDegrees(clon, clat, h + 10),
           /*
           polygon: {
@@ -509,7 +512,7 @@ const CesiumMap3D = memo(function CesiumMap3D({
   }
 
   // ── Fetch & render fleet ───────────────────────────────────────────────────
-  async function fetchFleet(viewer, Cesium) {
+  async function fetchFleet(viewer, Cesium, showInitial) {
     try {
       const res = await fetch(apiUrl('/api/collections/fleet/items'))
       if (!res.ok) return
@@ -524,6 +527,7 @@ const CesiumMap3D = memo(function CesiumMap3D({
         const hex = FLEET_COLORS[props.type] || FLEET_COLORS.default
 
         const entity = viewer.entities.add({
+          show: showInitial,
           position: Cesium.Cartesian3.fromDegrees(lon, lat, 15),
           billboard: {
             image: makeIcon(props.type, hex),

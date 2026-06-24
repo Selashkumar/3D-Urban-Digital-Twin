@@ -61,6 +61,12 @@ function App() {
     : fleetData
 
   useEffect(() => {
+    if (!buildingInteractionEnabled) {
+      setSelectedBuilding(null)
+    }
+  }, [buildingInteractionEnabled])
+
+  useEffect(() => {
     fetch(apiUrl('/health'))
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
