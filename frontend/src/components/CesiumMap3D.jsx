@@ -275,12 +275,18 @@ const CesiumMap3D = memo(function CesiumMap3D({
 
             viewer.scene.primitives.add(tileset)
             tilesetRef.current = tileset
-            tileset.show = layerVisibility?.buildings !== false
+            tileset.show = layerVisibility?.structures !== false
             googleTilesLoadedRef.current = true
 
             // Hide the static database building polygons since we have realistic tiles!
             buildingsRef.current.forEach(ent => {
               if (ent.polygon) ent.polygon.show = false
+            })
+
+            // Listen to initialTilesLoaded to resolve loader
+            tileset.initialTilesLoaded.addEventListener(() => {
+              console.log('[CesiumMap3D] Google Tileset initial tiles loaded')
+              if (viewer._resolveTilesetLoad) viewer._resolveTilesetLoad()
             })
 
             console.log('[CesiumMap3D] Google Photorealistic 3D Tiles loaded successfully')
@@ -303,13 +309,22 @@ const CesiumMap3D = memo(function CesiumMap3D({
               
               viewer.scene.primitives.add(t)
               tilesetRef.current = t
-              t.show = layerVisibility?.buildings !== false
+              t.show = layerVisibility?.structures !== false
               t.style = new Cesium.Cesium3DTileStyle({
                 color: "color('white')",
               })
+
+              t.initialTilesLoaded.addEventListener(() => {
+                console.log('[CesiumMap3D] OSM Fallback initial tiles loaded')
+                if (viewer._resolveTilesetLoad) viewer._resolveTilesetLoad()
+              })
+
               console.log('[CesiumMap3D] OSM Buildings fallback loaded successfully')
             })
-            .catch(e => console.warn('[CesiumMap3D] OSM Buildings fallback failed:', e))
+            .catch(e => {
+              console.warn('[CesiumMap3D] OSM Buildings fallback failed:', e)
+              if (viewer._resolveTilesetLoad) viewer._resolveTilesetLoad()
+            })
         })
 
       // ── Click: select building ─────────────────────────────────────────
@@ -374,10 +389,31 @@ const CesiumMap3D = memo(function CesiumMap3D({
         })
       }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
 
+      // ── A promise that resolves when the 3D structures tileset loads its initial tiles (safety timeout of 10s) ──
+      const tilesetLoadPromise = new Promise((resolve) => {
+        let resolved = false
+        const safetyTimeout = setTimeout(() => {
+          if (!resolved) {
+            console.log('[CesiumMap3D] Tileset load timed out (safety fallback)')
+            resolved = true
+            resolve()
+          }
+        }, 10000)
+
+        viewer._resolveTilesetLoad = () => {
+          if (!resolved) {
+            clearTimeout(safetyTimeout)
+            resolved = true
+            resolve()
+          }
+        }
+      })
+
       // ── Load data ──────────────────────────────────────────────────────
       Promise.all([
         fetchBuildings(viewer, Cesium),
-        fetchFleet(viewer, Cesium)
+        fetchFleet(viewer, Cesium),
+        tilesetLoadPromise
       ]).then(() => {
         if (!cancelled) {
           setMapLoaded(true)
@@ -614,6 +650,7 @@ const CesiumMap3D = memo(function CesiumMap3D({
   useEffect(() => {
     const viewer = viewerRef.current
     if (!viewer) return
+    const ss = layerVisibility?.structures !== false
     const sb = layerVisibility?.buildings !== false
     const sf = layerVisibility?.fleet !== false
     buildingsRef.current.forEach(e => {
@@ -628,7 +665,7 @@ const CesiumMap3D = memo(function CesiumMap3D({
     fleetRef.current.forEach(e => { e.show = sf })
 
     if (tilesetRef.current) {
-      tilesetRef.current.show = sb
+      tilesetRef.current.show = ss
     }
   }, [layerVisibility])
 
@@ -719,7 +756,7 @@ const CesiumMap3D = memo(function CesiumMap3D({
           heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
           extrudedHeightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
         },
-        show: layerVisibility?.buildings !== false,
+        show: true,
       })
 
       tempEnt._isTemp = true

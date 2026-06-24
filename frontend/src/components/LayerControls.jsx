@@ -32,10 +32,17 @@ export default function LayerControls({
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <LayerToggleRow
-          label="3D Buildings"
-          active={layerVisibility.buildings}
+          label="3D Building Structures"
+          active={layerVisibility.structures}
           accent="var(--accent-blue)"
           icon={<CityIcon size={16} style={{ color: 'var(--accent-blue)' }} />}
+          onToggle={() => handleToggle('structures')}
+        />
+        <LayerToggleRow
+          label="Building Info & Labels"
+          active={layerVisibility.buildings}
+          accent="var(--accent-cyan)"
+          icon={<CityIcon size={16} style={{ color: 'var(--accent-cyan)' }} />}
           onToggle={() => handleToggle('buildings')}
         />
         <LayerToggleRow

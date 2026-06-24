@@ -13,8 +13,9 @@ function App() {
   const [selectedBuilding, setSelectedBuilding] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [layerVisibility, setLayerVisibility] = useState({
-    buildings: true,
-    fleet: true,
+    structures: true,
+    buildings: false,
+    fleet: false,
     imagery: 'esri',
   })
   const [backendStatus, setBackendStatus] = useState('checking')
