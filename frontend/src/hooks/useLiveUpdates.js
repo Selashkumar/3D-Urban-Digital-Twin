@@ -45,10 +45,12 @@ export function useLiveUpdates(enabled = true) {
       switch (msg.type) {
         case 'fleet_update':
           setLastFleetUpdate({ features: msg.features, ts: Date.now() })
+          window.dispatchEvent(new CustomEvent('fleet-update', { detail: msg.features }))
           break
 
         case 'building_update':
           setLastBuildingUpdate({ features: msg.features || [], ts: Date.now() })
+          window.dispatchEvent(new CustomEvent('building-update', { detail: msg.features || [] }))
           break
 
         default:

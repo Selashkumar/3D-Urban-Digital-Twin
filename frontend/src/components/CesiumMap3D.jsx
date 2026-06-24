@@ -11,7 +11,7 @@
   - FLYTHROUGH: cinematic automated tour of city landmarks
 */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, memo } from 'react'
 import { apiUrl } from '../utils/apiConfig'
 
 // ── Cesium ion token ─────────────────────────────────────────────────────────
@@ -145,13 +145,12 @@ function loadCesium() {
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function CesiumMap3D({
+const CesiumMap3D = memo(function CesiumMap3D({
   layerVisibility,
   onBuildingClick,
-  lastFleetUpdate,
-  lastBuildingUpdate,
   selectedBuilding,
   buildingInteractionEnabled,
+  onMapReady,
 }) {
   const [mapLoaded, setMapLoaded] = useState(false)
   const containerRef   = useRef(null)
@@ -204,6 +203,7 @@ export default function CesiumMap3D({
         scene3DOnly:               true,
         skyBox:                    false,
         skyAtmosphere:             false,
+        shouldAnimate:             true,
       })
 
       if (cancelled) { viewer.destroy(); return }
@@ -360,10 +360,21 @@ export default function CesiumMap3D({
       }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
 
       // ── Load data ──────────────────────────────────────────────────────
-      fetchBuildings(viewer, Cesium)
-      fetchFleet(viewer, Cesium)
-
-      setMapLoaded(true)
+      Promise.all([
+        fetchBuildings(viewer, Cesium),
+        fetchFleet(viewer, Cesium)
+      ]).then(() => {
+        if (!cancelled) {
+          setMapLoaded(true)
+          onMapReady && onMapReady()
+        }
+      }).catch(err => {
+        console.warn('[CesiumMap3D] Initial data load error:', err)
+        if (!cancelled) {
+          setMapLoaded(true)
+          onMapReady && onMapReady()
+        }
+      })
 
     }).catch(err => console.error('[CesiumMap3D] Failed to load Cesium:', err))
 
@@ -477,78 +488,112 @@ export default function CesiumMap3D({
     }
   }
 
-  // ── Fleet WS updates ──────────────────────────────────────────────────────
+  // ── WebSocket Updates via Custom Events (avoiding React re-renders) ──────
   useEffect(() => {
-    const viewer = viewerRef.current
-    const Cesium = CesiumRef.current
-    if (!viewer || !Cesium || !lastFleetUpdate?.features?.length) return
+    if (!mapLoaded) return
 
-    lastFleetUpdate.features.forEach(f => {
-      const props = f.properties || {}
-      const [lon, lat] = f.geometry?.coordinates || [null, null]
-      if (lon == null) return
+    const handleFleetUpdate = (e) => {
+      const viewer = viewerRef.current
+      const Cesium = CesiumRef.current
+      if (!viewer || !Cesium || !e.detail) return
 
-      const vid = String(props.vehicle_id || f.id)
-      const ent = fleetRef.current.get(vid)
-      if (!ent) return
+      e.detail.forEach(f => {
+        const props = f.properties || {}
+        const [lon, lat] = f.geometry?.coordinates || [null, null]
+        if (lon == null) return
 
-      const targetPos = Cesium.Cartesian3.fromDegrees(lon, lat, 0)
-      if (ent.position && typeof ent.position.setValue === 'function') {
-        ent.position.setValue(targetPos)
-      } else {
-        ent.position = new Cesium.ConstantPositionProperty(targetPos)
-      }
+        const vid = String(props.vehicle_id || f.id)
+        const ent = fleetRef.current.get(vid)
+        if (!ent) return
 
-      if (ent.billboard) {
-        const rad = Cesium.Math.toRadians(-(props.heading || 0))
-        if (ent.billboard.rotation && typeof ent.billboard.rotation.setValue === 'function') {
-          ent.billboard.rotation.setValue(rad)
-        } else {
-          ent.billboard.rotation = new Cesium.ConstantProperty(rad)
+        const targetPos = Cesium.Cartesian3.fromDegrees(lon, lat, 0)
+
+        // ── Smooth vehicle position interpolation ──
+        let property = ent.position
+        if (!(property instanceof Cesium.SampledPositionProperty)) {
+          property = new Cesium.SampledPositionProperty()
+          property.backwardExtrapolationType = Cesium.ExtrapolationType.HOLD
+          property.forwardExtrapolationType = Cesium.ExtrapolationType.HOLD
+          property.setInterpolationOptions({
+            interpolationDegree: 1,
+            interpolationAlgorithm: Cesium.LinearApproximation,
+          })
+          ent.position = property
         }
-      }
-    })
-  }, [lastFleetUpdate])
 
-  // ── Building WS updates ───────────────────────────────────────────────────
-  useEffect(() => {
-    const viewer = viewerRef.current
-    const Cesium = CesiumRef.current
-    if (!viewer || !Cesium || !lastBuildingUpdate?.features?.length) return
+        // Sim updates every 3 seconds; project target 3s in the future
+        const time = Cesium.JulianDate.addSeconds(viewer.clock.currentTime, 3, new Cesium.JulianDate())
+        property.addSample(time, targetPos)
 
-    lastBuildingUpdate.features.forEach(f => {
-      const props = f.properties || {}
-      const fid = String(props.featureId || f.id)
-      const ent = buildingsRef.current.get(fid)
-      if (!ent) return
+        // Prevent memory growth by keeping samples clean
+        const thresholdTime = Cesium.JulianDate.addSeconds(viewer.clock.currentTime, -12, new Cesium.JulianDate())
+        property.removeSamplesBeforeDate(thresholdTime)
 
-      const h = props.height || 10
-
-      // Update floating label position height
-      if (ent.position && ent._buildingData?.geometry?.coordinates) {
-        const ring = ent._buildingData.geometry.coordinates[0]
-        const clon = ring.reduce((s, pt) => s + pt[0], 0) / ring.length
-        const clat = ring.reduce((s, pt) => s + pt[1], 0) / ring.length
-        const targetPos = Cesium.Cartesian3.fromDegrees(clon, clat, h + 10)
-        if (typeof ent.position.setValue === 'function') {
-          ent.position.setValue(targetPos)
-        } else {
-          ent.position = new Cesium.ConstantPositionProperty(targetPos)
+        // ── Billboard rotation interpolation ──
+        if (ent.billboard) {
+          const rad = Cesium.Math.toRadians(-(props.heading || 0))
+          let rotProperty = ent.billboard.rotation
+          if (!(rotProperty instanceof Cesium.SampledProperty)) {
+            rotProperty = new Cesium.SampledProperty(Number)
+            ent.billboard.rotation = rotProperty
+          }
+          rotProperty.addSample(time, rad)
+          rotProperty.removeSamplesBeforeDate(thresholdTime)
         }
-      }
+      })
+    }
 
-      // Update polygon extrudedHeight
-      if (ent.polygon) {
-        if (ent.polygon.extrudedHeight && typeof ent.polygon.extrudedHeight.setValue === 'function') {
-          ent.polygon.extrudedHeight.setValue(h)
-        } else {
-          ent.polygon.extrudedHeight = new Cesium.ConstantProperty(h)
+    const handleBuildingUpdate = (e) => {
+      const viewer = viewerRef.current
+      const Cesium = CesiumRef.current
+      if (!viewer || !Cesium || !e.detail) return
+
+      e.detail.forEach(f => {
+        const props = f.properties || {}
+        const fid = String(props.featureId || f.id)
+        const ent = buildingsRef.current.get(fid)
+        if (!ent) return
+
+        const h = props.height || 10
+
+        // Update floating label position height
+        if (ent.position && ent._buildingData?.geometry?.coordinates) {
+          const ring = ent._buildingData.geometry.coordinates[0]
+          const clon = ring.reduce((s, pt) => s + pt[0], 0) / ring.length
+          const clat = ring.reduce((s, pt) => s + pt[1], 0) / ring.length
+          const targetPos = Cesium.Cartesian3.fromDegrees(clon, clat, h + 10)
+          
+          if (ent.position instanceof Cesium.SampledPositionProperty) {
+            const time = Cesium.JulianDate.addSeconds(viewer.clock.currentTime, 1, new Cesium.JulianDate())
+            ent.position.addSample(time, targetPos)
+          } else if (typeof ent.position.setValue === 'function') {
+            ent.position.setValue(targetPos)
+          } else {
+            ent.position = new Cesium.ConstantPositionProperty(targetPos)
+          }
         }
-      }
 
-      ent._buildingData = { ...ent._buildingData, properties: props }
-    })
-  }, [lastBuildingUpdate])
+        // Update polygon extrudedHeight
+        if (ent.polygon) {
+          if (ent.polygon.extrudedHeight && typeof ent.polygon.extrudedHeight.setValue === 'function') {
+            ent.polygon.extrudedHeight.setValue(h)
+          } else {
+            ent.polygon.extrudedHeight = new Cesium.ConstantProperty(h)
+          }
+        }
+
+        ent._buildingData = { ...ent._buildingData, properties: props }
+      })
+    }
+
+    window.addEventListener('fleet-update', handleFleetUpdate)
+    window.addEventListener('building-update', handleBuildingUpdate)
+
+    return () => {
+      window.removeEventListener('fleet-update', handleFleetUpdate)
+      window.removeEventListener('building-update', handleBuildingUpdate)
+    }
+  }, [mapLoaded])
 
   // ── Layer visibility ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -675,7 +720,9 @@ export default function CesiumMap3D({
       style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
     />
   )
-}
+})
+
+export default CesiumMap3D
 
 function pulseEntity(entity, Cesium) {
   if (!entity?.polygon) return

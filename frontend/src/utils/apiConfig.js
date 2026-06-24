@@ -1,7 +1,17 @@
 // Shared API / WebSocket base URLs for dev (Vite proxy) and production (Azure SWA)
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
-const WS_BASE = import.meta.env.VITE_WS_BASE_URL || ''
+const IS_LOCAL = typeof window !== 'undefined' && (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1'
+)
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (
+  IS_LOCAL ? '' : 'https://3d-urban-twin-backend-fpgufvbxgqbsefgx.southindia-01.azurewebsites.net'
+)
+
+const WS_BASE = import.meta.env.VITE_WS_BASE_URL || (
+  IS_LOCAL ? '' : 'wss://3d-urban-twin-backend-fpgufvbxgqbsefgx.southindia-01.azurewebsites.net'
+)
 
 export function apiUrl(path) {
   const normalized = path.startsWith('/') ? path : `/${path}`

@@ -3,6 +3,7 @@ import CesiumMap3D from './components/CesiumMap3D'
 import Sidebar from './components/Sidebar'
 import BuildingPopup from './components/BuildingPopup'
 import StatsBar from './components/StatsBar'
+import InitialLoader from './components/InitialLoader'
 import { useLiveUpdates } from './hooks/useLiveUpdates'
 import { useOGCData } from './hooks/useOGCData'
 import { CITY_BBOX } from './utils/mapConfig'
@@ -19,6 +20,7 @@ function App() {
   const [backendStatus, setBackendStatus] = useState('checking')
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(false)
   const [buildingInteractionEnabled, setBuildingInteractionEnabled] = useState(false)
+  const [mapLoading, setMapLoading] = useState(true)
 
   const { status: wsStatus, lastFleetUpdate, lastBuildingUpdate } = useLiveUpdates(liveUpdatesEnabled)
   const { data: buildingsData, loading: buildingsLoading } = useOGCData('buildings', {
@@ -72,6 +74,7 @@ function App() {
 
   return (
     <div className="app-container">
+      <InitialLoader visible={mapLoading} />
       <StatsBar
         buildings={buildings}
         fleet={liveFleetData}
@@ -98,10 +101,9 @@ function App() {
           <CesiumMap3D
             layerVisibility={layerVisibility}
             onBuildingClick={setSelectedBuilding}
-            lastFleetUpdate={lastFleetUpdate}
-            lastBuildingUpdate={lastBuildingUpdate}
             selectedBuilding={selectedBuilding}
             buildingInteractionEnabled={buildingInteractionEnabled}
+            onMapReady={() => setMapLoading(false)}
           />
 
           {/* ── Building Detail Popup ── */}
