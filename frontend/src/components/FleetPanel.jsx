@@ -2,7 +2,7 @@
 // originally rendered this inside Map3D as MapLibre popups but it cluttered the map too much
 // moving it to the sidebar was the right call
 
-import { useMemo } from 'react'
+import { useMemo, memo } from 'react'
 import { FLEET_TYPE_COLORS } from '../utils/mapConfig'
 import { TruckIcon, BusIcon, EmergencyIcon, DeliveryIcon, CarIcon } from './Icons'
 
@@ -97,7 +97,7 @@ export default function FleetPanel({ fleetData }) {
   )
 }
 
-function VehicleRow({ vehicle }) {
+const VehicleRow = memo(function VehicleRow({ vehicle }) {
   const props = vehicle.properties || {}
   const isMoving = props.status === 'moving'
   const color = FLEET_TYPE_COLORS[props.type] || FLEET_TYPE_COLORS.default
@@ -174,4 +174,17 @@ function VehicleRow({ vehicle }) {
       }} />
     </div>
   )
-}
+}, (prev, next) => {
+  const pProps = prev.vehicle.properties || {}
+  const nProps = next.vehicle.properties || {}
+  const pGeom = prev.vehicle.geometry || {}
+  const nGeom = next.vehicle.geometry || {}
+  return (
+    pProps.vehicle_id === nProps.vehicle_id &&
+    pProps.status === nProps.status &&
+    pProps.speed === nProps.speed &&
+    pProps.type === nProps.type &&
+    pGeom.coordinates?.[0] === nGeom.coordinates?.[0] &&
+    pGeom.coordinates?.[1] === nGeom.coordinates?.[1]
+  )
+})

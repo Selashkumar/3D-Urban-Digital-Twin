@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import CesiumMap3D from './components/CesiumMap3D'
 import Sidebar from './components/Sidebar'
 import BuildingPopup from './components/BuildingPopup'
@@ -22,6 +22,10 @@ function App() {
   const [liveUpdatesEnabled, setLiveUpdatesEnabled] = useState(false)
   const [buildingInteractionEnabled, setBuildingInteractionEnabled] = useState(false)
   const [mapLoading, setMapLoading] = useState(true)
+
+  const handleMapReady = useCallback(() => {
+    setMapLoading(false)
+  }, [])
 
   const { status: wsStatus, lastFleetUpdate, lastBuildingUpdate } = useLiveUpdates(liveUpdatesEnabled)
   const { data: buildingsData, loading: buildingsLoading } = useOGCData('buildings', {
@@ -104,7 +108,7 @@ function App() {
             onBuildingClick={setSelectedBuilding}
             selectedBuilding={selectedBuilding}
             buildingInteractionEnabled={buildingInteractionEnabled}
-            onMapReady={() => setMapLoading(false)}
+            onMapReady={handleMapReady}
           />
 
           {/* ── Building Detail Popup ── */}

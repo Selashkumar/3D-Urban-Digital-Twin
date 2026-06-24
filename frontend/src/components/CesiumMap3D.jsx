@@ -179,6 +179,9 @@ const CesiumMap3D = memo(function CesiumMap3D({
 
       if (HAS_TOKEN) Cesium.Ion.defaultAccessToken = ION_TOKEN
 
+      // Optimize network request scheduling for Google Photorealistic 3D Tiles
+      Cesium.RequestScheduler.requestsByServer["tile.googleapis.com:443"] = 18
+
       const esriProvider = new Cesium.UrlTemplateImageryProvider({
         url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         credit: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
@@ -212,9 +215,9 @@ const CesiumMap3D = memo(function CesiumMap3D({
 
       // Scene tweaks & performance optimization for zoom/scroll/high-DPI Macbook Retina screens
       viewer.resolutionScale = Math.min(1.0, window.devicePixelRatio || 1.0)
-      viewer.scene.globe.maximumScreenSpaceError = 3.0 // Reduces terrain mesh grid detail slightly for significant FPS gains
+      viewer.scene.globe.maximumScreenSpaceError = 8.0 // Reduces terrain mesh grid detail for significant FPS gains
       viewer.scene.globe.loadingQueueThreshold = 20    // Keeps rendering smooth when loading maps/terrain
-      viewer.scene.globe.tileCacheSize = 256           // Retain more tiles in cache
+      viewer.scene.globe.tileCacheSize = 512           // Retain more tiles in cache
       
       viewer.scene.globe.enableLighting = false
       viewer.scene.fog.enabled = true
@@ -267,11 +270,12 @@ const CesiumMap3D = memo(function CesiumMap3D({
         .then(tileset => {
           if (!cancelled && viewer) {
             // Apply level-of-detail and memory performance tuning
-            tileset.maximumScreenSpaceError = 24  // Default is 16; increasing this reduces texture/mesh detail slightly for much higher FPS
-            tileset.maximumMemoryUsage = 512       // Cap memory utilization to 512MB
+            tileset.maximumScreenSpaceError = 32  // Default is 16; increasing this reduces texture/mesh detail slightly for much higher FPS
+            tileset.maximumMemoryUsage = 2048      // Cap memory utilization to 2048MB to prevent cache thrashing
             tileset.progressiveResolutionHeightFraction = 0.5 // Renders lower quality during quick camera moves/zooms
             tileset.foveatedScreenSpaceError = true
             tileset.foveatedConeSize = 0.1
+            tileset.dynamicScreenSpaceError = true // Dynamically adjust level of detail based on distance
 
             viewer.scene.primitives.add(tileset)
             tilesetRef.current = tileset
@@ -304,8 +308,9 @@ const CesiumMap3D = memo(function CesiumMap3D({
           Cesium.Cesium3DTileset.fromIonAssetId(96188)
             .then(t => {
               if (cancelled || !viewerRef.current) return
-              t.maximumScreenSpaceError = 24  // Performance optimization for OSM fallback tileset
-              t.maximumMemoryUsage = 512
+              t.maximumScreenSpaceError = 32  // Performance optimization for OSM fallback tileset
+              t.maximumMemoryUsage = 2048
+              t.dynamicScreenSpaceError = true
               
               viewer.scene.primitives.add(t)
               tilesetRef.current = t
