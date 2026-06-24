@@ -524,12 +524,12 @@ const CesiumMap3D = memo(function CesiumMap3D({
         const hex = FLEET_COLORS[props.type] || FLEET_COLORS.default
 
         const entity = viewer.entities.add({
-          position: Cesium.Cartesian3.fromDegrees(lon, lat, 0),
+          position: Cesium.Cartesian3.fromDegrees(lon, lat, 15),
           billboard: {
             image: makeIcon(props.type, hex),
             width: 36, height: 36,
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            heightReference: Cesium.HeightReference.NONE,
             disableDepthTestDistance: Number.POSITIVE_INFINITY,
             rotation: Cesium.Math.toRadians(-(props.heading || 0)),
             alignedAxis: Cesium.Cartesian3.UNIT_Z,
@@ -562,7 +562,7 @@ const CesiumMap3D = memo(function CesiumMap3D({
         const ent = fleetRef.current.get(vid)
         if (!ent) return
 
-        const targetPos = Cesium.Cartesian3.fromDegrees(lon, lat, 0)
+        const targetPos = Cesium.Cartesian3.fromDegrees(lon, lat, 15)
 
         // ── Smooth vehicle position interpolation ──
         let property = ent.position
