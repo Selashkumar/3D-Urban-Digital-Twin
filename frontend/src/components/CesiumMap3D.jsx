@@ -210,7 +210,12 @@ const CesiumMap3D = memo(function CesiumMap3D({
 
       viewerRef.current = viewer
 
-      // Scene tweaks
+      // Scene tweaks & performance optimization for zoom/scroll/high-DPI Macbook Retina screens
+      viewer.resolutionScale = Math.min(1.0, window.devicePixelRatio || 1.0)
+      viewer.scene.globe.maximumScreenSpaceError = 3.0 // Reduces terrain mesh grid detail slightly for significant FPS gains
+      viewer.scene.globe.loadingQueueThreshold = 20    // Keeps rendering smooth when loading maps/terrain
+      viewer.scene.globe.tileCacheSize = 256           // Retain more tiles in cache
+      
       viewer.scene.globe.enableLighting = false
       viewer.scene.fog.enabled = true
       viewer.scene.fog.density = 0.00008
@@ -261,6 +266,13 @@ const CesiumMap3D = memo(function CesiumMap3D({
       Cesium.createGooglePhotorealistic3DTileset()
         .then(tileset => {
           if (!cancelled && viewer) {
+            // Apply level-of-detail and memory performance tuning
+            tileset.maximumScreenSpaceError = 24  // Default is 16; increasing this reduces texture/mesh detail slightly for much higher FPS
+            tileset.maximumMemoryUsage = 512       // Cap memory utilization to 512MB
+            tileset.progressiveResolutionHeightFraction = 0.5 // Renders lower quality during quick camera moves/zooms
+            tileset.foveatedScreenSpaceError = true
+            tileset.foveatedConeSize = 0.1
+
             viewer.scene.primitives.add(tileset)
             tilesetRef.current = tileset
             tileset.show = layerVisibility?.buildings !== false
@@ -286,6 +298,9 @@ const CesiumMap3D = memo(function CesiumMap3D({
           Cesium.Cesium3DTileset.fromIonAssetId(96188)
             .then(t => {
               if (cancelled || !viewerRef.current) return
+              t.maximumScreenSpaceError = 24  // Performance optimization for OSM fallback tileset
+              t.maximumMemoryUsage = 512
+              
               viewer.scene.primitives.add(t)
               tilesetRef.current = t
               t.show = layerVisibility?.buildings !== false
